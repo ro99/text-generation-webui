@@ -1,3 +1,4 @@
+import json
 from modules import shared
 from modules.logging_colors import logger
 from modules.LoRA import add_lora_to_model
@@ -50,12 +51,20 @@ def model_info_dict(model_name: str) -> dict:
 
 def _load_model(data):
     model_name = data["model_name"]
-    args = data["args"]
-    settings = data["settings"]
 
     unload_model()
     model_settings = get_model_metadata(model_name)
     update_model_parameters(model_settings)
+
+    try:
+        with open('model_args.json', 'r') as f:
+            args = json.load(f)
+    except FileNotFoundError:
+        logger.warning("model_args.json not found. Using default arguments.")
+        args = {}
+    except json.JSONDecodeError:
+        logger.error("Error decoding model_args.json. Using default arguments.")
+        args = {}
 
     # Update shared.args with custom model loading settings
     if args:
@@ -64,6 +73,16 @@ def _load_model(data):
                 setattr(shared.args, k, args[k])
 
     shared.model, shared.tokenizer = load_model(model_name)
+
+    try:
+        with open('model_settings.json', 'r') as f:
+            settings = json.load(f)
+    except FileNotFoundError:
+        logger.warning("model_settings.json not found. Using default settings.")
+        settings = {}
+    except json.JSONDecodeError:
+        logger.error("Error decoding model_settings.json. Using default settings.")
+        settings = {}
 
     # Update shared.settings with custom generation defaults
     if settings:
