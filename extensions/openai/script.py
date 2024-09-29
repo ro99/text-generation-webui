@@ -121,6 +121,7 @@ async def openai_completions(request: Request, request_data: CompletionRequest):
 async def openai_chat_completions(request: Request, request_data: ChatCompletionRequest):
     path = request.url.path
     is_legacy = "/generate" in path
+    model_name = to_dict(request_data).model
 
     if request_data.stream:
         async def generator():
@@ -147,12 +148,23 @@ async def handle_models(request: Request):
     is_list = request.url.path.split('?')[0].split('#')[0] == '/v1/models'
 
     if is_list:
-        response = OAImodels.list_dummy_models()
+        response = OAImodels.list_models()
     else:
         model_name = path[len('/v1/models/'):]
         response = OAImodels.model_info_dict(model_name)
 
     return JSONResponse(response)
+
+@app.post("/v1/models/load", dependencies=check_key)
+async def handle_load_model(request: Request):
+    try:
+        data = await request.json()
+
+        OAImodels._load_model(data)
+        return JSONResponse(content="OK")
+    except:
+        traceback.print_exc()
+        return HTTPException(status_code=400, detail="Failed to load the model.")
 
 
 @app.get('/v1/billing/usage', dependencies=check_key)
@@ -286,43 +298,6 @@ async def handle_model_info():
 async def handle_list_models():
     payload = OAImodels.list_models()
     return JSONResponse(content=payload)
-
-
-@app.post("/v1/internal/model/load", dependencies=check_admin_key)
-async def handle_load_model(request_data: LoadModelRequest):
-    '''
-    This endpoint is experimental and may change in the future.
-
-    The "args" parameter can be used to modify flags like "--load-in-4bit"
-    or "--n-gpu-layers" before loading a model. Example:
-
-    ```
-    "args": {
-      "load_in_4bit": true,
-      "n_gpu_layers": 12
-    }
-    ```
-
-    Note that those settings will remain after loading the model. So you
-    may need to change them back to load a second model.
-
-    The "settings" parameter is also a dict but with keys for the
-    shared.settings object. It can be used to modify the default instruction
-    template like this:
-
-    ```
-    "settings": {
-      "instruction_template": "Alpaca"
-    }
-    ```
-    '''
-
-    try:
-        OAImodels._load_model(to_dict(request_data))
-        return JSONResponse(content="OK")
-    except:
-        traceback.print_exc()
-        return HTTPException(status_code=400, detail="Failed to load the model.")
 
 
 @app.post("/v1/internal/model/unload", dependencies=check_admin_key)
