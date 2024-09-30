@@ -90,28 +90,30 @@ def load_model(model_name, loader=None):
                 raise ValueError
 
     shared.args.loader = loader
-    output = load_func_map[loader](model_name)
-    if type(output) is tuple:
-        model, tokenizer = output
-    else:
-        model = output
-        if model is None:
-            return None, None
+    try:
+        output = load_func_map[loader](model_name)
+        if type(output) is tuple:
+            model, tokenizer = output
         else:
-            tokenizer = load_tokenizer(model_name)
+            model = output
+            if model is None:
+                return None, None
+            else:
+                tokenizer = load_tokenizer(model_name)
 
-    shared.settings.update({k: v for k, v in metadata.items() if k in shared.settings})
-    if loader.lower().startswith('exllama') or loader.lower().startswith('tensorrt'):
-        shared.settings['truncation_length'] = shared.args.max_seq_len
-    elif loader in ['llama.cpp', 'llamacpp_HF']:
-        shared.settings['truncation_length'] = shared.args.n_ctx
+        shared.settings.update({k: v for k, v in metadata.items() if k in shared.settings})
+        if loader.lower().startswith('exllama') or loader.lower().startswith('tensorrt'):
+            shared.settings['truncation_length'] = shared.args.max_seq_len
+        elif loader in ['llama.cpp', 'llamacpp_HF']:
+            shared.settings['truncation_length'] = shared.args.n_ctx
 
-    logger.info(f"Loaded \"{model_name}\" in {(time.time()-t0):.2f} seconds.")
-    logger.info(f"LOADER: \"{loader}\"")
-    logger.info(f"TRUNCATION LENGTH: {shared.settings['truncation_length']}")
-    logger.info(f"INSTRUCTION TEMPLATE: \"{metadata['instruction_template']}\"")
-    return model, tokenizer
-
+        logger.info(f"Loaded \"{model_name}\" in {(time.time()-t0):.2f} seconds.")
+        logger.info(f"LOADER: \"{loader}\"")
+        logger.info(f"TRUNCATION LENGTH: {shared.settings['truncation_length']}")
+        logger.info(f"INSTRUCTION TEMPLATE: \"{metadata['instruction_template']}\"")
+        return model, tokenizer
+    except Exception as e:
+        raise e
 
 def load_tokenizer(model_name, tokenizer_dir=None):
     if tokenizer_dir:

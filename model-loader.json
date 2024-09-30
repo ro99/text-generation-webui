@@ -1,0 +1,12 @@
+{
+    "Gemma-2-27B-Instruct_turboderp-8bpw.exl2": {
+      "args": {
+        "loader": "ExLlamav2_HF",
+        "autosplit": true,
+        "max_seq_len": 8192000
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
+    }
+  }

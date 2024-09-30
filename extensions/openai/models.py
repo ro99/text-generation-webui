@@ -52,27 +52,42 @@ def model_info_dict(model_name: str) -> dict:
 def _load_model(data):
     model_name = data["model_name"]
 
+    try:
+        with open('model-loader.json', 'r') as f:
+            args = json.load(f)
+    except FileNotFoundError:
+        logger.warning("model-loader.json not found. Using default arguments.")
+        args = {}
+    except json.JSONDecodeError:
+        logger.error("Error decoding model-loader.json. Using default arguments.")
+        args = {}
+
+    # Check if model is already loaded and if configuration has changed
+    current_model_info = get_current_model_info()
+    if current_model_info['model_name'] == model_name and shared.model is not None:
+        params = args.get(model_name, {}).get('args', {})
+        config_changed = any(getattr(shared.args, k, None) != v for k, v in params.items())
+        
+        if not config_changed:
+            logger.info(f"Model '{model_name}' is already loaded with current configuration. Skipping unload and load steps.")
+            return
+        
     unload_model()
     model_settings = get_model_metadata(model_name)
     update_model_parameters(model_settings)
 
-    try:
-        with open('model_args.json', 'r') as f:
-            args = json.load(f)
-    except FileNotFoundError:
-        logger.warning("model_args.json not found. Using default arguments.")
-        args = {}
-    except json.JSONDecodeError:
-        logger.error("Error decoding model_args.json. Using default arguments.")
-        args = {}
-
     # Update shared.args with custom model loading settings
     if args:
-        for k in args:
+        params = args.get(model_name, {})
+        for k in params['args']:
             if hasattr(shared.args, k):
-                setattr(shared.args, k, args[k])
+                setattr(shared.args, k, params['args'][k])
 
-    shared.model, shared.tokenizer = load_model(model_name)
+    try:
+        shared.model, shared.tokenizer = load_model(model_name)
+    except Exception as e:
+        logger.error(f"Failed to load model: {model_name}")
+        raise e
 
     try:
         with open('model_settings.json', 'r') as f:

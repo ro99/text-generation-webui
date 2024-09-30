@@ -121,7 +121,6 @@ async def openai_completions(request: Request, request_data: CompletionRequest):
 async def openai_chat_completions(request: Request, request_data: ChatCompletionRequest):
     path = request.url.path
     is_legacy = "/generate" in path
-    model_name = to_dict(request_data).model
 
     if request_data.stream:
         async def generator():
@@ -159,12 +158,11 @@ async def handle_models(request: Request):
 async def handle_load_model(request: Request):
     try:
         data = await request.json()
-
         OAImodels._load_model(data)
         return JSONResponse(content="OK")
     except:
         traceback.print_exc()
-        return HTTPException(status_code=400, detail="Failed to load the model.")
+        return JSONResponse(status_code=500, content="Failed to load the model.")
 
 
 @app.get('/v1/billing/usage', dependencies=check_key)
