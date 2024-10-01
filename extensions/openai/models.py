@@ -51,10 +51,12 @@ def model_info_dict(model_name: str) -> dict:
 
 def _load_model(data):
     model_name = data["model_name"]
-
+    all_args = {}
     try:
         with open('model-loader.json', 'r') as f:
-            args = json.load(f)
+            all_args = json.load(f)
+        args = all_args.get(model_name, {}).get('args', {})
+        settings = all_args.get(model_name, {}).get('settings', {})
     except FileNotFoundError:
         logger.warning("model-loader.json not found. Using default arguments.")
         args = {}
@@ -65,10 +67,12 @@ def _load_model(data):
     # Check if model is already loaded and if configuration has changed
     current_model_info = get_current_model_info()
     if current_model_info['model_name'] == model_name and shared.model is not None:
-        params = args.get(model_name, {}).get('args', {})
-        config_changed = any(getattr(shared.args, k, None) != v for k, v in params.items())
+        params_args = args.get(model_name, {}).get('args', {})
+        config_args_changed = any(getattr(shared.args, k, None) != v for k, v in params_args.items())
+        params_settings = settings.get(model_name, {}).get('settings', {})
+        config_settings_changed = any(getattr(shared.settings, k, None) != v for k, v in params_settings.items())
         
-        if not config_changed:
+        if not config_args_changed and not config_settings_changed:
             logger.info(f"Model '{model_name}' is already loaded with current configuration. Skipping unload and load steps.")
             return
         
@@ -78,26 +82,14 @@ def _load_model(data):
 
     # Update shared.args with custom model loading settings
     if args:
-        params = args.get(model_name, {})
-        for k in params['args']:
+        for k, v in args.items():
             if hasattr(shared.args, k):
-                setattr(shared.args, k, params['args'][k])
-
+                setattr(shared.args, k, v)
     try:
         shared.model, shared.tokenizer = load_model(model_name)
     except Exception as e:
         logger.error(f"Failed to load model: {model_name}")
         raise e
-
-    try:
-        with open('model_settings.json', 'r') as f:
-            settings = json.load(f)
-    except FileNotFoundError:
-        logger.warning("model_settings.json not found. Using default settings.")
-        settings = {}
-    except json.JSONDecodeError:
-        logger.error("Error decoding model_settings.json. Using default settings.")
-        settings = {}
 
     # Update shared.settings with custom generation defaults
     if settings:

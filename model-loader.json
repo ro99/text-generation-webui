@@ -3,7 +3,16 @@
       "args": {
         "loader": "ExLlamav2_HF",
         "autosplit": true,
-        "max_seq_len": 8192000
+        "max_seq_len": 8192
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
+    },
+    "Gemmasutra-Pro-27B-v1i-Q6_K.gguf": {
+      "args": {
+        "loader": "llama.cpp",
+        "n_ctx": 8192
       },
       "settings": {
         "instruction_template": "None"
