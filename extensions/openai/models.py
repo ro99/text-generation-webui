@@ -26,7 +26,6 @@ def list_models():
 
     return result
 
-
 def list_dummy_models():
     result = {
         "object": "list",

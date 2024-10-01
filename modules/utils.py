@@ -78,7 +78,7 @@ def get_available_models():
         if not item.name.endswith(('.txt', '-np', '.pt', '.json', '.yaml', '.py')) and 'llama-tokenizer' not in item.name:
             model_list.append(item.name)
 
-    return ['None'] + sorted(model_list, key=natural_keys)
+    return sorted(model_list, key=natural_keys)
 
 
 def get_available_ggufs():
@@ -87,7 +87,7 @@ def get_available_ggufs():
         if item.is_file() and item.name.lower().endswith(".gguf"):
             model_list.append(item.name)
 
-    return ['None'] + sorted(model_list, key=natural_keys)
+    return sorted(model_list, key=natural_keys)
 
 
 def get_available_presets():
@@ -113,7 +113,7 @@ def get_available_instruction_templates():
     if os.path.exists(path):
         paths = (x for x in Path(path).iterdir() if x.suffix in ('.json', '.yaml', '.yml'))
 
-    return ['None'] + sorted(set((k.stem for k in paths)), key=natural_keys)
+    return sorted(set((k.stem for k in paths)), key=natural_keys)
 
 
 def get_available_extensions():
@@ -123,15 +123,15 @@ def get_available_extensions():
 
 
 def get_available_loras():
-    return ['None'] + sorted([item.name for item in list(Path(shared.args.lora_dir).glob('*')) if not item.name.endswith(('.txt', '-np', '.pt', '.json'))], key=natural_keys)
+    return sorted([item.name for item in list(Path(shared.args.lora_dir).glob('*')) if not item.name.endswith(('.txt', '-np', '.pt', '.json'))], key=natural_keys)
 
 
 def get_datasets(path: str, ext: str):
     # include subdirectories for raw txt files to allow training from a subdirectory of txt files
     if ext == "txt":
-        return ['None'] + sorted(set([k.stem for k in list(Path(path).glob('*.txt')) + list(Path(path).glob('*/')) if k.stem != 'put-trainer-datasets-here']), key=natural_keys)
+        return sorted(set([k.stem for k in list(Path(path).glob('*.txt')) + list(Path(path).glob('*/')) if k.stem != 'put-trainer-datasets-here']), key=natural_keys)
 
-    return ['None'] + sorted(set([k.stem for k in Path(path).glob(f'*.{ext}') if k.stem != 'put-trainer-datasets-here']), key=natural_keys)
+    return sorted(set([k.stem for k in Path(path).glob(f'*.{ext}') if k.stem != 'put-trainer-datasets-here']), key=natural_keys)
 
 
 def get_available_chat_styles():
@@ -139,4 +139,4 @@ def get_available_chat_styles():
 
 
 def get_available_grammars():
-    return ['None'] + sorted([item.name for item in list(Path('grammars').glob('*.gbnf'))], key=natural_keys)
+    return sorted([item.name for item in list(Path('grammars').glob('*.gbnf'))], key=natural_keys)

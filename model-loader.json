@@ -17,5 +17,60 @@
       "settings": {
         "instruction_template": "None"
       }
+    },
+    "NeverSleep_Lumimaid-v0.2-123B_exl2_3.5bpw_h8": {
+      "args": {
+        "loader": "ExLlamav2_HF",
+        "autosplit": true,
+        "cache_4bit": true,
+        "max_seq_len": 12000
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
+    },
+    "Qwen2.5-32B-Instruct-8.0bpw-h8-exl2": {
+      "args": {
+        "loader": "ExLlamav2_HF",
+        "autosplit": true,
+        "max_seq_len": 32768
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
+    },
+    "Qwen2.5-72B-Instruct-6.0bpw-h6-exl2": {
+      "args": {
+        "loader": "ExLlamav2_HF",
+        "autosplit": true,
+        "cache_4bit": true,
+        "max_seq_len": 9984
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
+    },
+    "Mistral-Large-Instruct-2407-123B-exl2-3.5bpw": {
+      "args": {
+        "loader": "ExLlamav2_HF",
+        "autosplit": true,
+        "cache_4bit": true,
+        "max_seq_len": 18204
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
+    },
+    "Theia-21B-v1-Q8_0.gguf": {
+      "args": {
+        "loader": "llama.cpp",
+        "flash_attn": true,
+        "cache_4bit": true,
+        "no_offload_kqv": true,
+        "n_ctx": 202400
+      },
+      "settings": {
+        "instruction_template": "None"
+      }
     }
   }
